@@ -1,0 +1,36 @@
+name: zepp_simulator
+base: core20
+version: '1.1.2' # Following original deb version
+summary: Simulator of Zepp devices for development
+description: |
+  In order to help developers develop and debug Zepp OS apps simply and efficiently, 
+  we have launched a new Zepp OS development simulator, 
+  which integrates two development modes: Zepp Studio debugging and Zeus Cli debugging.
+  https://docs.zepp.com/docs/guides/tools/simulator/
+
+grade: devel # must be 'stable' to release into candidate/stable channels
+confinement: devmode # use 'strict' once you have the right plugs and slots
+
+parts:
+  base:
+    plugin: nil
+    prepare: |
+      dpkg --add-architecture i386
+      apt-get update
+      apt install -y build-essential
+      apt install -y openssh-server
+      apt install -y cmake make gcc g++ gdb gcc-multilib git curl wget zip unzip unar
+      apt install -y libc6:i386 libncurses5:i386 libstdc++6:i386 libx11-dev:i386 libssl-dev:i386
+
+  other:
+    plugin: nil
+    prepare: |  
+      export GCC_7_BASE="gcc-7-base_7.5.0-1ubuntu1_i386.deb"
+      export LIBASAN4="libasan4_7.5.0-1ubuntu1_i386.deb"
+      export TMP="/tmp"
+      apt install -y python3 python3-pip
+      python3 -m pip install -i https://mirrors.aliyun.com/pypi/simple click
+      wget $WGET_OPT -O "${TMP}/${GCC_7_BASE}" "http://launchpadlibrarian.net/451544819/${GCC_7_BASE}"
+      wget $WGET_OPT -O "${TMP}/${LIBASAN4}" "http://launchpadlibrarian.net/451544861/${LIBASAN4}"
+      dpkg -i $TMP/$GCC_7_BASE
+      dpkg -i $TMP/$LIBASAN4
